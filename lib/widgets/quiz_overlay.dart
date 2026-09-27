@@ -2,7 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-/// Confirmation quiz shown on top of the video player.
+/// Confirmation quiz dialog shown above the video player.
+///
+/// Meant to be shown with [showDialog] rather than stacked as a widget next
+/// to the player: a dialog route composites as its own layer, which reliably
+/// stays above the player's WebView (a native platform view) even during
+/// resizes/rotation, whereas a `Positioned` widget in the same route can end
+/// up rendered behind that WebView.
 ///
 /// Counts down from [durationSeconds] and calls [onResolved] either when the
 /// user taps Yes/No or when the countdown reaches zero, whichever happens
@@ -54,54 +60,49 @@ class _QuizOverlayState extends State<QuizOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.75),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(24),
-        child: Card(
-          color: Colors.white,
-          elevation: 8,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Are you sure you want to continue watching?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Auto-continue in $_secondsLeft s',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => _resolve(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Yes'),
+    return PopScope(
+      canPop: false,
+      child: Dialog(
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Are you sure you want to continue watching?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Auto-continue in $_secondsLeft s',
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _resolve(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
                     ),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () => _resolve(false),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('No'),
+                    child: const Text('Yes'),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () => _resolve(false),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    child: const Text('No'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
